@@ -25,7 +25,7 @@ import { FieldError, FieldLabel, NativeSelect, TextInput } from './form-fields'
 import { LanguagePicker } from './language-picker'
 
 export function WelcomeScreen() {
-  const { draft, submitOnboarding } = useSession()
+  const { draft, error, authStatus, submitOnboarding } = useSession()
   const [subStep, setSubStep] = useState<'language' | 'details'>(
     draft ? 'details' : 'language',
   )
@@ -240,6 +240,22 @@ export function WelcomeScreen() {
           />
         </div>
 
+        {error ? (
+          <p
+            role="alert"
+            className="rounded-2xl border-2 border-destructive/40 bg-destructive/8 p-4 text-base font-semibold text-destructive"
+          >
+            {error}
+          </p>
+        ) : null}
+
+        {/* Explains the disabled Continue button while sign-in is in flight. */}
+        {authStatus === 'pending' ? (
+          <p role="status" className="text-base font-semibold text-muted-foreground">
+            Preparing your session…
+          </p>
+        ) : null}
+
         {/* Actions */}
         <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
@@ -252,8 +268,10 @@ export function WelcomeScreen() {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-6 text-xl font-bold text-primary-foreground shadow-storybook transition-transform hover:bg-teal-dark active:translate-y-px sm:flex-none sm:px-10"
+            // Answers are written on submit, so there must be a session first.
+            disabled={isSubmitting || authStatus !== 'ready'}
+            aria-disabled={isSubmitting || authStatus !== 'ready'}
+            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-6 text-xl font-bold text-primary-foreground shadow-storybook transition-transform hover:bg-teal-dark active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:flex-none sm:px-10"
           >
             Continue
             <ArrowRight className="size-6" />

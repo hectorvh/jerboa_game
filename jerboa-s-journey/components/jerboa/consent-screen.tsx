@@ -29,9 +29,13 @@ const STATEMENTS = [
 ]
 
 export function ConsentScreen() {
-  const { submitConsent } = useSession()
+  const { error, authStatus, submitConsent } = useSession()
   const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  // A consent decision that cannot be written must not be actionable: both
+  // answers are recorded rows, so neither button works without a session.
+  const blocked = busy || authStatus !== 'ready'
 
   async function handleDecision(decision: boolean) {
     setBusy(true)
@@ -94,20 +98,30 @@ export function ConsentScreen() {
         </span>
       </label>
 
+      {error ? (
+        <p
+          role="alert"
+          className="mt-4 rounded-2xl border-2 border-destructive/40 bg-destructive/8 p-4 text-base font-semibold text-destructive"
+        >
+          {error}
+        </p>
+      ) : null}
+
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={() => handleDecision(false)}
-          disabled={busy}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-input bg-background px-6 text-lg font-bold text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+          disabled={blocked}
+          aria-disabled={blocked}
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-input bg-background px-6 text-lg font-bold text-muted-foreground transition-colors hover:border-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
         >
           Decline
         </button>
         <button
           type="button"
           onClick={() => handleDecision(true)}
-          disabled={!agreed || busy}
-          aria-disabled={!agreed || busy}
+          disabled={!agreed || blocked}
+          aria-disabled={!agreed || blocked}
           className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-6 text-xl font-bold text-primary-foreground shadow-storybook transition-transform hover:bg-teal-dark active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:flex-none sm:px-10"
         >
           I Agree

@@ -37,7 +37,6 @@ export const metadata: Metadata = {
   title: "Jerboa's Journey — A Spatial Communication Adventure",
   description:
     "A gamified spatial-language research instrument. Help Jerboa cross the desert while taking part in the SCALA study.",
-  generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
